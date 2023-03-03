@@ -10,6 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
     $time = $input->t ?? 0;
     $start = $input->s ?? null;
     $end = $input->e ?? null;
+    $NSFC = $input->nsfc ?? null;
 
     if ($time < 0){ http_response_code(400); exit("Playtime error."); }
     if ($time > 90000){ http_response_code(400); exit("Playtime error."); }
@@ -23,6 +24,8 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
         $update['start'] = is_numeric($start) ? floatval($start) : null;
     if ($end !== null)
         $update['end'] = is_numeric($end) ? floatval($end) : null;
+    if($NSFC !== null)
+        $update['NSFC'] = $NSFC == true;
 
     if (array_key_exists('end', $update) && array_key_exists('start', $update)) {
         if ($update['end'] <= $update['start']) {

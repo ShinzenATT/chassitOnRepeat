@@ -27,9 +27,9 @@ class History
         return $videos;
     }
 
-    public static function getRandomVideo(): Video
+    public static function getRandomVideo(bool $filterUnsafe): Video
     {
-        $files = array_values(self::getRepeats(self::getFiles()));
+        $files = array_values(self::getRepeats(self::getFiles(), $filterUnsafe));
         $video = $files[rand(0, sizeof($files))];
 
         /*
@@ -41,8 +41,8 @@ class History
             }
         }
         */
-        
-        
+
+
         return $video;
     }
 
@@ -67,7 +67,7 @@ class History
      * @param Video[] $videos A list of videos to merge the database data with
      * @return Video[]
      */
-    public static function getRepeats(array $videos): array
+    public static function getRepeats(array $videos, bool $filterUnsafe = false): array
     {
         $cursor = DB::getRepeatCollection()->find([], ['sort' => ['playtime' => -1]]);
         foreach ($cursor as $value) {
@@ -79,13 +79,18 @@ class History
                 $video->start = self::getFloatVal($value, 'start');
                 $video->end = self::getFloatVal($value, 'end');
                 $video->playtime = $value["playtime"] ?? 0;
+                $video->NSFC = $value["NSFC"] ?? false;
 
                 $videos[$id] = $video;
-            } else { // ...but it's without the placeholder.
+            } /*else { // ...but it's without the placeholder.
                 //$videos[$id] = new Video($value["name"], $value["name"], self::getFloatVal($value, 'start'), self::getFloatVal($value, 'end'), $value["playtime"] ?? 0);
-            }
+            }*/
         }
-        return $videos;
+
+        if($filterUnsafe)
+            return array_filter($videos, function(Video $e) {return  $e->NSFC === false;});
+        else
+            return $videos;
     }
 
     /**

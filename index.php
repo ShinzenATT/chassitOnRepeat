@@ -38,13 +38,12 @@ if ($id !== "") {
     }
 }
 
-$start = getFloatParam('s', $start); 
+$start = getFloatParam('s', $start);
 $end = getFloatParam('e', $end);
+$nsfc = $_GET["nsfc"] == "true";
 
 $video = History::getRepeats([getVideo($id)])[0];
 $file = "files/$video->name-$video->id.mp4";
-
-$totalTime = History::getTotalTime();
 ?>
 <!DOCTYPE html>
 <html lang="sv">
@@ -60,10 +59,11 @@ $totalTime = History::getTotalTime();
         Your browser does not support HTML5 video.
     </video>
     <h1> <?= $video->name ?> </h1>
-    <p id="videoloops"> Playtime:  <?= History::toDisplayTime($video->playtime, true) ?> </p>
+    <p id="videoloops"> Playtime:  0s </p>
     <input id="v" type="hidden" value="<?= $id ?>"/>
     <input id="start" placeholder="start" type="number" value="<?=$start == 0 ? "": $start ?>"/>
     <input id="end" placeholder="end" type="number" value="<?=$end == 90000 ? "": $end ?>"/>
+    <input id="nsfc" type="checkbox" checked="<?= $nsfc ?>" value="true">
     <button onclick="sendInterval()">Update loop</button>
 </div>
 
@@ -80,9 +80,8 @@ $totalTime = History::getTotalTime();
 
     let start = <?= $start ?>;
     let end = <?= $end ?>;
-    let playtime = <?= $video->playtime ?>;
-    console.log(<?php echo "\"Total playtime: " . $totalTime . "s\""; ?>);
-    console.log(<?php echo "\"Total playtime: " . History::toDisplayTime($totalTime, true) . "\""; ?>);
+    let playtime = 0;
+    let nsfc = <?= $nsfc ?>;
     console.log(start);
     console.log(end);
 
@@ -119,6 +118,7 @@ $totalTime = History::getTotalTime();
                 v: '<?= $id ?>',
                 s: start > 0 ? start : null,
                 e: end > myVideo.duration ? null : end,
+                nsfc
             })
         }).then(async value => {
             if (!value.ok)

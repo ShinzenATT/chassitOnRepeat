@@ -10,7 +10,9 @@ if (!isset($_GET["s"])){ $start = "0"; }
 if (!isset($_GET["e"])){ $end = "90000"; }
 */
 
-$video = History::getRandomVideo();
+$NSFC = $_GET["nsfc"] == true;
+
+$video = History::getRandomVideo($NSFC);
 $file = "files/$video->name-$video->id.mp4";
 
 $start = $video->start ?? 0;
@@ -71,7 +73,7 @@ $totalTime = History::getTotalTime();
 
     function endHandler(){
         update(this.duration - start);
-        fetch("/switchrandom.php").then(e => e.json()).then(e => {
+        fetch("/switchrandom.php?nsfc=<?= $NSFC ?>").then(e => e.json()).then(e => {
             console.log(e);
             start = e.start ?? 0;
             end = e.end ?? 90000;
